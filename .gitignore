@@ -33,6 +33,16 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Google service account keys
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.*.json
+!next.config*.json
+!postcss.config*.json
+!*.code-workspace
+
 # vercel
 .vercel
 
