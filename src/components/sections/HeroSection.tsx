@@ -33,35 +33,6 @@ export default function HeroSection({
     return () => clearTimeout(timer);
   }, [started, startDelay]);
 
-  // Stage 3 appears → ramp the (already-playing, silent) audio up to
-  // audible volume. The audio was started inside the user tap on the
-  // intro splash; we only adjust volume here, so iOS won't block us.
-  useEffect(() => {
-    if (!mounted) return;
-    const audio = audioRef?.current;
-    if (!audio) return;
-
-    // Just in case the play() call during the tap was lost (e.g. page
-    // refresh kept state), try again — this will silently fail on iOS
-    // if the gesture already expired, which is fine.
-    if (audio.paused) {
-      const p = audio.play();
-      if (p) p.catch(() => {});
-    }
-
-    const target = 0.45;
-    const stepMs = 80;
-    const steps = 30;
-    let i = 0;
-    const id = setInterval(() => {
-      i += 1;
-      audio.volume = Math.min(target, (target * i) / steps);
-      if (i >= steps) clearInterval(id);
-    }, stepMs);
-
-    return () => clearInterval(id);
-  }, [mounted, audioRef]);
-
   const toggleMute = () => {
     const audio = audioRef?.current;
     if (!audio) return;

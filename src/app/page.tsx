@@ -24,17 +24,14 @@ export default function Home() {
   const [started, setStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // iOS Safari only allows media playback that is started inside a user
-  // gesture. The mute/volume ramp we want for stage 3 happens ~13.5s after
-  // the tap, long after the gesture has expired. Workaround: on tap, we
-  // begin playing the audio immediately at volume 0 — iOS treats it as a
-  // gesture-initiated stream and will let us raise the volume later.
+  // Start background music in sync with the intro video. play() is
+  // called inside the user tap, so iOS/Safari allow audible playback.
   const handleStart = () => {
     setStarted(true);
     const audio = audioRef.current;
     if (!audio) return;
     audio.muted = false;
-    audio.volume = 0;
+    audio.volume = 0.45;
     const p = audio.play();
     if (p) p.catch(() => {});
   };
