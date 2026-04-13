@@ -53,18 +53,32 @@ export default function IntroVideoSection({
 
   if (!isVisible) return null;
 
+  // iOS Safari won't paint a video's first frame before play unless the
+  // source has a time fragment. Appending #t=0.001 forces the decoder to
+  // seek there on load, so the splash shows the first frame instead of a
+  // dark placeholder.
+  const iosSafeSrc = videoSrc.includes("#") ? videoSrc : `${videoSrc}#t=0.001`;
+
   return (
     <div
       className={`fixed inset-0 z-50 overflow-hidden bg-[var(--color-warm-black)] transition-opacity duration-[1200ms] ease-out
         ${isFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="presentation"
+      style={{ height: "100dvh" }}
     >
       <video
         ref={videoRef}
-        src={videoSrc}
+        src={iosSafeSrc}
+        poster="/hero-image.jpg"
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+        }}
       />
 
       {!started && (

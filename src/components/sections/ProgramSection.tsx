@@ -22,7 +22,7 @@ const PROGRAM: ProgramItem[] = [
   {
     time: "13:30",
     title: "Gelin Alma",
-    description: "Baba evinden çıkış.",
+    description: "Kız evinden çıkış.",
     location: "Gelin Evi · Alanya, Antalya",
     mapsLink:
       "https://www.google.com/maps/place/Cikcilli,+220.+Sk.+No:35,+07400+Alanya%2FAntalya/@36.5450665,32.0310262,17z/data=!3m1!4b1!4m6!3m5!1s0x14dc98fedbbf0477:0xb5db51f6852422f6!8m2!3d36.5450665!4d32.0336011!16s%2Fg%2F11yfz4jlcj?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D",

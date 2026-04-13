@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Hero Section
@@ -23,12 +23,45 @@ export default function HeroSection({
   startDelay?: number;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!started) return;
     const timer = setTimeout(() => setMounted(true), startDelay);
     return () => clearTimeout(timer);
   }, [started, startDelay]);
+
+  // Fade in the background music as stage 3 appears.
+  useEffect(() => {
+    if (!mounted) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0;
+    const playPromise = audio.play();
+    if (playPromise) playPromise.catch(() => {});
+
+    const target = 0.45;
+    const stepMs = 80;
+    const steps = 30;
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      audio.volume = Math.min(target, (target * i) / steps);
+      if (i >= steps) clearInterval(id);
+    }, stepMs);
+
+    return () => clearInterval(id);
+  }, [mounted]);
+
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const next = !muted;
+    audio.muted = next;
+    setMuted(next);
+  };
 
   const scrollDown = () => {
     window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
@@ -39,6 +72,8 @@ export default function HeroSection({
       id="hero"
       className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-[var(--color-cream)]"
     >
+      {/* Background music — starts when stage 3 mounts */}
+      <audio ref={audioRef} src="/bg-music.mp3" loop preload="auto" />
       {/* Background (no photo, just romantic tone with light beam) */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         {/* Soft base gradient */}
@@ -151,6 +186,27 @@ export default function HeroSection({
           </p>
         </div>
       </div>
+
+      {/* Music toggle — appears with stage 3 */}
+      <button
+        onClick={toggleMute}
+        aria-label={muted ? "Müziği aç" : "Müziği kapat"}
+        className={`absolute top-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center
+          bg-[var(--color-warm-white)]/70 backdrop-blur-sm border border-[var(--color-champagne)]/40
+          text-[var(--color-warm-charcoal)] hover:bg-[var(--color-warm-white)] transition-all duration-500
+          ${mounted ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        style={{ transitionDelay: mounted ? "1800ms" : "0ms" }}
+      >
+        {muted ? (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+        )}
+      </button>
 
       {/* Scroll indicator */}
       <button

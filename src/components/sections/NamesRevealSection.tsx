@@ -57,14 +57,15 @@ export default function NamesRevealSection({
       className={`fixed inset-0 z-40 overflow-hidden transition-opacity duration-[1000ms] ease-out
         ${isFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="presentation"
+      style={{ height: "100dvh" }}
     >
       <Image
         src="/hero-image.jpg"
         alt=""
         fill
         priority
-        className="object-cover object-center"
         sizes="100vw"
+        style={{ objectFit: "cover", objectPosition: "center" }}
       />
 
       <div className="absolute inset-0 bg-[var(--color-warm-black)]/35" />
