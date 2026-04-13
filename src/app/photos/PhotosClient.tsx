@@ -4,6 +4,11 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import RevealSection from "@/components/ui/RevealSection";
+import {
+  compressImage,
+  canCompress,
+  MAX_UPLOAD_BYTES,
+} from "@/lib/compressImage";
 
 interface PhotosClientProps {
   galleryUrl: string;
@@ -27,59 +32,109 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
     setUploadError(null);
   };
 
+  const uploadSingle = async (
+    file: File,
+    trimmedName: string
+  ): Promise<{ ok: boolean; error?: string }> => {
+    const formData = new FormData();
+    formData.append("files", file);
+    if (trimmedName) formData.append("uploaderName", trimmedName);
+
+    let response: Response;
+    try {
+      response = await fetch("/api/photos/upload", {
+        method: "POST",
+        body: formData,
+      });
+    } catch {
+      return { ok: false, error: "Ağ bağlantısı kesildi." };
+    }
+
+    if (response.status === 413) {
+      return { ok: false, error: "Dosya boyutu sunucu limitini aşıyor." };
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return {
+        ok: response.ok,
+        error: response.ok ? undefined : "Sunucu beklenmedik bir yanıt döndürdü.",
+      };
+    }
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      return {
+        ok: false,
+        error: (data && data.error) || "Yükleme başarısız.",
+      };
+    }
+    return { ok: true };
+  };
+
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
     setUploadError(null);
-    setUploadProgress(10);
+    setUploadProgress(0);
 
-    try {
-      const formData = new FormData();
+    const trimmedName = uploaderName.trim();
+    const failed: string[] = [];
+    const oversized: string[] = [];
+    let success = 0;
 
-      for (const file of selectedFiles) {
-        formData.append("files", file);
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const original = selectedFiles[i];
+      let toUpload = original;
+
+      if (canCompress(original)) {
+        try {
+          toUpload = await compressImage(original);
+        } catch {
+          toUpload = original;
+        }
       }
 
-      if (uploaderName.trim()) {
-        formData.append("uploaderName", uploaderName.trim());
+      if (toUpload.size > MAX_UPLOAD_BYTES) {
+        oversized.push(original.name);
+        setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
+        continue;
       }
 
-      setUploadProgress(30);
-
-      const response = await fetch("/api/photos/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      setUploadProgress(80);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Yükleme başarısız.");
+      const result = await uploadSingle(toUpload, trimmedName);
+      if (result.ok) {
+        success++;
+      } else if (result.error?.includes("limit")) {
+        oversized.push(original.name);
+      } else {
+        failed.push(original.name);
       }
+      setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
+    }
 
-      setUploadProgress(100);
+    const messages: string[] = [];
+    if (oversized.length > 0) {
+      messages.push(
+        `Görsel boyutu fazla büyük: ${oversized.join(", ")}`
+      );
+    }
+    if (failed.length > 0) {
+      messages.push(`Yüklenemedi: ${failed.join(", ")}`);
+    }
+    if (messages.length > 0) {
+      setUploadError(messages.join(" · "));
+    }
 
-      if (data.errors && data.errors.length > 0) {
-        setUploadError(
-          `${data.uploadedCount}/${data.totalCount} dosya yüklendi. Bazı dosyalar yüklenemedi.`
-        );
-      }
-
+    if (success > 0) {
       setUploadSuccess(true);
       setSelectedFiles([]);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (err) {
-      setUploadError(
-        err instanceof Error ? err.message : "Yükleme sırasında bir hata oluştu."
-      );
-    } finally {
-      setIsUploading(false);
     }
+
+    setIsUploading(false);
   };
 
   const removeFile = (index: number) => {
