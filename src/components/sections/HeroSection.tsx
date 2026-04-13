@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useState } from "react";
 
 /**
  * Hero Section
@@ -18,13 +18,14 @@ import { useEffect, useRef, useState } from "react";
 export default function HeroSection({
   started = false,
   startDelay = 13500,
+  audioRef,
 }: {
   started?: boolean;
   startDelay?: number;
+  audioRef?: RefObject<HTMLAudioElement | null>;
 }) {
   const [mounted, setMounted] = useState(false);
   const [muted, setMuted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!started) return;
@@ -32,15 +33,21 @@ export default function HeroSection({
     return () => clearTimeout(timer);
   }, [started, startDelay]);
 
-  // Fade in the background music as stage 3 appears.
+  // Stage 3 appears → ramp the (already-playing, silent) audio up to
+  // audible volume. The audio was started inside the user tap on the
+  // intro splash; we only adjust volume here, so iOS won't block us.
   useEffect(() => {
     if (!mounted) return;
-    const audio = audioRef.current;
+    const audio = audioRef?.current;
     if (!audio) return;
 
-    audio.volume = 0;
-    const playPromise = audio.play();
-    if (playPromise) playPromise.catch(() => {});
+    // Just in case the play() call during the tap was lost (e.g. page
+    // refresh kept state), try again — this will silently fail on iOS
+    // if the gesture already expired, which is fine.
+    if (audio.paused) {
+      const p = audio.play();
+      if (p) p.catch(() => {});
+    }
 
     const target = 0.45;
     const stepMs = 80;
@@ -53,10 +60,10 @@ export default function HeroSection({
     }, stepMs);
 
     return () => clearInterval(id);
-  }, [mounted]);
+  }, [mounted, audioRef]);
 
   const toggleMute = () => {
-    const audio = audioRef.current;
+    const audio = audioRef?.current;
     if (!audio) return;
     const next = !muted;
     audio.muted = next;
@@ -72,8 +79,6 @@ export default function HeroSection({
       id="hero"
       className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-[var(--color-cream)]"
     >
-      {/* Background music — starts when stage 3 mounts */}
-      <audio ref={audioRef} src="/bg-music.mp3" loop preload="auto" />
       {/* Background (no photo, just romantic tone with light beam) */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         {/* Soft base gradient */}
