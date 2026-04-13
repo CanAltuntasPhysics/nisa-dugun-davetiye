@@ -41,8 +41,8 @@ export default function Home() {
       {/* Wedding day program timeline — cream bg */}
       <ProgramSection />
 
-      {/* Soft transition: cream → ivory */}
-      <div className="section-transition-cream-to-ivory" />
+      {/* Soft transition: cream → ivory (shortened between program & memories) */}
+      <div className="section-transition-cream-to-ivory" style={{ height: 32 }} />
 
       {/* Photo sharing invitation with QR — ivory bg */}
       <DriveSection />

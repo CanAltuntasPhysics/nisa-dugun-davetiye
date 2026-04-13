@@ -119,7 +119,7 @@ export default function CountdownSection() {
               2 Mayıs 2026
             </h2>
             <p className="text-[var(--color-champagne-muted)] text-lg mt-3">
-              Cumartesi, Saat 16:00
+              Cumartesi, Saat 19:00
             </p>
           </div>
         </RevealSection>

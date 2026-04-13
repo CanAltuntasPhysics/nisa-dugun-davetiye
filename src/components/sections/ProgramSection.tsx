@@ -23,6 +23,9 @@ const PROGRAM: ProgramItem[] = [
     time: "13:30",
     title: "Gelin Alma",
     description: "Baba evinden çıkış.",
+    location: "Gelin Evi · Alanya, Antalya",
+    mapsLink:
+      "https://www.google.com/maps/place/Cikcilli,+220.+Sk.+No:35,+07400+Alanya%2FAntalya/@36.5450665,32.0310262,17z/data=!3m1!4b1!4m6!3m5!1s0x14dc98fedbbf0477:0xb5db51f6852422f6!8m2!3d36.5450665!4d32.0336011!16s%2Fg%2F11yfz4jlcj?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D",
     icon: "🥁",
   },
   {
@@ -120,7 +123,7 @@ export default function ProgramSection() {
   return (
     <section
       id="program"
-      className="section-spacing !pt-16 bg-[var(--color-cream)]"
+      className="section-spacing !pt-16 !pb-12 bg-[var(--color-cream)]"
     >
       <div className="max-w-[var(--container-text)] mx-auto px-6">
         <RevealSection>
@@ -130,12 +133,6 @@ export default function ProgramSection() {
             <h2 className="text-headline text-3xl sm:text-4xl mt-6">
               Günün Akışı
             </h2>
-            <p className="text-body-elegant mt-4 max-w-md mx-auto">
-              Özel günümüzün her anını birlikte yaşayacağız.
-            </p>
-            <p className="font-serif italic text-lg text-[var(--color-warm-charcoal-light)] mt-4">
-              "İşin olsun 28-29-30 Nisan tarihlerinde Gelin Evinde yapılacaktır."
-            </p>
           </div>
         </RevealSection>
 
@@ -145,6 +142,15 @@ export default function ProgramSection() {
             <ProgramCard key={item.time} item={item} index={index} />
           ))}
         </div>
+
+        {/* Kına / Gelin Evi note */}
+        <RevealSection delay={550}>
+          <div className="text-center mt-4 mb-10 max-w-xl mx-auto">
+            <p className="font-serif italic text-lg text-[var(--color-warm-charcoal-light)]">
+              "İşin olsun 28-29-30 Nisan tarihlerinde Gelin Evinde yapılacaktır."
+            </p>
+          </div>
+        </RevealSection>
 
         {/* Map CTA */}
         <RevealSection delay={600}>

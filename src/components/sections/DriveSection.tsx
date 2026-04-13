@@ -19,7 +19,7 @@ export default function DriveSection() {
   return (
     <section
       id="photos-cta"
-      className="section-spacing bg-[var(--color-ivory)]"
+      className="section-spacing !pt-12 bg-[var(--color-ivory)]"
     >
       <div className="max-w-[var(--container-text)] mx-auto px-6">
         <RevealSection>
