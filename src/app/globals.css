@@ -429,3 +429,29 @@ body {
   animation: elegant-blink 2.8s ease-in-out infinite;
 }
 
+/* ============================================================
+   COUNTDOWN DIGIT — smooth slide transition when value changes
+   ============================================================ */
+
+@keyframes digitSlideIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes digitSlideOut {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+

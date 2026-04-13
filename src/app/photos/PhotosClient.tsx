@@ -7,9 +7,10 @@ import RevealSection from "@/components/ui/RevealSection";
 
 interface PhotosClientProps {
   galleryUrl: string;
+  driveUrl: string | null;
 }
 
-export default function PhotosClient({ galleryUrl }: PhotosClientProps) {
+export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploaderName, setUploaderName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -97,16 +98,28 @@ export default function PhotosClient({ galleryUrl }: PhotosClientProps) {
             Nisa & Ömer
           </Link>
 
-          <a
-            href={galleryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-2 text-xs font-sans tracking-[0.12em] uppercase rounded-full
-              bg-[var(--color-warm-charcoal)] text-[var(--color-warm-white)]
-              hover:bg-[var(--color-warm-black)] transition-all duration-300"
-          >
-            Galeriyi Görüntüle
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={galleryUrl}
+              className="px-5 py-2 text-xs font-sans tracking-[0.12em] uppercase rounded-full
+                bg-[var(--color-warm-charcoal)] text-[var(--color-warm-white)]
+                hover:bg-[var(--color-warm-black)] transition-all duration-300"
+            >
+              Galeriyi Görüntüle
+            </a>
+            {driveUrl && (
+              <a
+                href={driveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2 text-xs font-sans tracking-[0.12em] uppercase rounded-full
+                  border border-[var(--color-warm-charcoal)] text-[var(--color-warm-charcoal)]
+                  hover:bg-[var(--color-warm-charcoal)] hover:text-[var(--color-warm-white)] transition-all duration-300"
+              >
+                Drive'da Görüntüle
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
@@ -148,12 +161,7 @@ export default function PhotosClient({ galleryUrl }: PhotosClientProps) {
                   >
                     Daha Fazla Yükle
                   </button>
-                  <a
-                    href={galleryUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary"
-                  >
+                  <a href={galleryUrl} className="btn-secondary">
                     Galeriyi Görüntüle
                   </a>
                 </div>

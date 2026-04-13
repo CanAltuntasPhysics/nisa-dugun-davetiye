@@ -20,7 +20,7 @@ interface ProgramItem {
 
 const PROGRAM: ProgramItem[] = [
   {
-    time: "14:00",
+    time: "13:30",
     title: "Gelin Alma",
     description: "Baba evinden çıkış.",
     icon: "🥁",
@@ -29,12 +29,16 @@ const PROGRAM: ProgramItem[] = [
     time: "19:00",
     title: "Nikah",
     description: "Resmi nikâh töreni ile yeni bir hayata adım atıyoruz.",
+    location: "Ruelya Garden · Alanya, Antalya",
+    mapsLink: "https://maps.google.com/?q=Ruelya+Garden+Alanya",
     icon: "💍",
   },
   {
     time: "19:30",
     title: "Yemek",
     description: "Özel menümüzle sizleri ağırlıyoruz.",
+    location: "Ruelya Garden · Alanya, Antalya",
+    mapsLink: "https://maps.google.com/?q=Ruelya+Garden+Alanya",
     icon: "🍽️",
   },
 ];
@@ -116,7 +120,7 @@ export default function ProgramSection() {
   return (
     <section
       id="program"
-      className="section-spacing bg-[var(--color-cream)]"
+      className="section-spacing !pt-16 bg-[var(--color-cream)]"
     >
       <div className="max-w-[var(--container-text)] mx-auto px-6">
         <RevealSection>
@@ -146,7 +150,7 @@ export default function ProgramSection() {
         <RevealSection delay={600}>
           <div className="text-center mt-8">
             <a
-              href="https://maps.google.com/?q=Çırağan+Sarayı+İstanbul"
+              href="https://maps.google.com/?q=Ruelya+Garden+Alanya"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary"

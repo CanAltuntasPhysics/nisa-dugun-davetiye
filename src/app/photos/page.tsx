@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function PhotosPage() {
   const folderId = process.env.DRIVE_GALLERY_FOLDER_ID;
-  const galleryUrl = folderId
+  const driveUrl = folderId
     ? `https://drive.google.com/drive/folders/${folderId}`
-    : "#";
+    : null;
 
-  return <PhotosClient galleryUrl={galleryUrl} />;
+  return <PhotosClient galleryUrl="/photos/gallery" driveUrl={driveUrl} />;
 }

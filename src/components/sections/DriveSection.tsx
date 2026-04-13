@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import RevealSection from "@/components/ui/RevealSection";
 
@@ -12,14 +11,10 @@ import RevealSection from "@/components/ui/RevealSection";
  */
 
 const PHOTOS_URL = "/photos";
+const QR_URL = "https://nisa-omer-davetiye.vercel.app/photos";
 
 export default function DriveSection() {
-  // Defer window access to avoid SSR hydration mismatch
-  const [qrValue, setQrValue] = useState(PHOTOS_URL);
-
-  useEffect(() => {
-    setQrValue(`${window.location.origin}${PHOTOS_URL}`);
-  }, []);
+  const qrValue = QR_URL;
 
   return (
     <section

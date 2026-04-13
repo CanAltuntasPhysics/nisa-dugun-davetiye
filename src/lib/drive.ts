@@ -49,6 +49,108 @@ export interface UploadResult {
   webViewLink?: string;
 }
 
+export interface GalleryFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  createdTime: string;
+  hasThumbnail: boolean;
+}
+
+export async function listGalleryFiles(): Promise<GalleryFile[]> {
+  const drive = getDrive();
+  const folderId = process.env.DRIVE_GALLERY_FOLDER_ID;
+
+  if (!folderId) {
+    throw new Error("DRIVE_GALLERY_FOLDER_ID is not set.");
+  }
+
+  const files: GalleryFile[] = [];
+  let pageToken: string | undefined;
+
+  do {
+    const response = await drive.files.list({
+      q: `'${folderId}' in parents and trashed = false and (mimeType contains 'image/' or mimeType contains 'video/')`,
+      pageSize: 200,
+      pageToken,
+      orderBy: "createdTime desc",
+      fields:
+        "nextPageToken, files(id, name, mimeType, createdTime, hasThumbnail)",
+    });
+
+    for (const f of response.data.files || []) {
+      if (!f.id || !f.name || !f.mimeType || !f.createdTime) continue;
+      files.push({
+        id: f.id,
+        name: f.name,
+        mimeType: f.mimeType,
+        createdTime: f.createdTime,
+        hasThumbnail: !!f.hasThumbnail,
+      });
+    }
+    pageToken = response.data.nextPageToken || undefined;
+  } while (pageToken);
+
+  return files;
+}
+
+export async function getFileMedia(fileId: string): Promise<{
+  stream: NodeJS.ReadableStream;
+  mimeType: string;
+  size?: number;
+}> {
+  const drive = getDrive();
+
+  const meta = await drive.files.get({
+    fileId,
+    fields: "mimeType, size",
+  });
+
+  const response = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "stream" }
+  );
+
+  return {
+    stream: response.data as NodeJS.ReadableStream,
+    mimeType: meta.data.mimeType || "application/octet-stream",
+    size: meta.data.size ? Number(meta.data.size) : undefined,
+  };
+}
+
+export async function getFileThumbnail(
+  fileId: string,
+  size: number = 400
+): Promise<{ body: ReadableStream<Uint8Array>; mimeType: string } | null> {
+  const drive = getDrive();
+  const auth = getAuth();
+
+  const meta = await drive.files.get({
+    fileId,
+    fields: "thumbnailLink, mimeType",
+  });
+
+  const thumbnailLink = meta.data.thumbnailLink;
+  if (!thumbnailLink) return null;
+
+  // thumbnailLink ends with =s220; swap for a larger size
+  const sized = thumbnailLink.replace(/=s\d+$/, `=s${size}`);
+
+  const token = await auth.getAccessToken();
+  const accessToken = typeof token === "string" ? token : token?.token;
+
+  const res = await fetch(sized, {
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
+
+  if (!res.ok || !res.body) return null;
+
+  return {
+    body: res.body,
+    mimeType: res.headers.get("content-type") || "image/jpeg",
+  };
+}
+
 /**
  * Upload a file to the incoming/upload folder on Google Drive.
  * Uses the authenticated user's storage quota.

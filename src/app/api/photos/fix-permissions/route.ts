@@ -24,6 +24,23 @@ export async function POST() {
     oauth2Client.setCredentials({ refresh_token: refreshToken });
     const drive = google.drive({ version: "v3", auth: oauth2Client });
 
+    // Make the folder itself publicly viewable so the "Galeriyi Görüntüle"
+    // link opens without an access request prompt.
+    let folderFixed = false;
+    try {
+      await drive.permissions.create({
+        fileId: folderId,
+        requestBody: { role: "reader", type: "anyone" },
+      });
+      folderFixed = true;
+      console.log(`🔓 [FIX] Gallery folder set to public: ${folderId}`);
+    } catch (err) {
+      console.error(
+        `❌ [FIX] Failed to set folder public:`,
+        err instanceof Error ? err.message : err
+      );
+    }
+
     // List all files in the folder
     const response = await drive.files.list({
       q: `'${folderId}' in parents and trashed = false`,
@@ -58,6 +75,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
+      folderFixed,
       total: files.length,
       fixed,
       errors,
