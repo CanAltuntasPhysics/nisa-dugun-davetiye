@@ -191,9 +191,10 @@ export default function HeroSection({
       <button
         onClick={toggleMute}
         aria-label={muted ? "Müziği aç" : "Müziği kapat"}
-        className={`absolute top-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center
-          bg-[var(--color-warm-white)]/70 backdrop-blur-sm border border-[var(--color-champagne)]/40
-          text-[var(--color-warm-charcoal)] hover:bg-[var(--color-warm-white)] transition-all duration-500
+        className={`fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full flex items-center justify-center
+          bg-[var(--color-warm-white)]/80 backdrop-blur-sm border border-[var(--color-champagne)]/40
+          text-[var(--color-warm-charcoal)] hover:bg-[var(--color-warm-white)] shadow-[var(--shadow-soft)]
+          transition-all duration-500
           ${mounted ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         style={{ transitionDelay: mounted ? "1800ms" : "0ms" }}
       >
