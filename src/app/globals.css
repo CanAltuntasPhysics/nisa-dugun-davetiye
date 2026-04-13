@@ -413,7 +413,7 @@ body {
 }
 
 .animate-light-beam {
-  animation: light-beam 8s ease-in-out infinite;
+  animation: light-beam 3s ease-in-out infinite;
 }
 
 /* ============================================================
