@@ -1,14 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import RevealSection from "@/components/ui/RevealSection";
-import {
-  compressImage,
-  canCompress,
-  MAX_UPLOAD_BYTES,
-} from "@/lib/compressImage";
 
 interface PhotosClientProps {
   galleryUrl: string;
@@ -16,131 +9,6 @@ interface PhotosClientProps {
 }
 
 export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploaderName, setUploaderName] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setSelectedFiles(files);
-    setUploadSuccess(false);
-    setUploadError(null);
-  };
-
-  const uploadSingle = async (
-    file: File,
-    trimmedName: string
-  ): Promise<{ ok: boolean; error?: string }> => {
-    const formData = new FormData();
-    formData.append("files", file);
-    if (trimmedName) formData.append("uploaderName", trimmedName);
-
-    let response: Response;
-    try {
-      response = await fetch("/api/photos/upload", {
-        method: "POST",
-        body: formData,
-      });
-    } catch {
-      return { ok: false, error: "Ağ bağlantısı kesildi." };
-    }
-
-    if (response.status === 413) {
-      return { ok: false, error: "Dosya boyutu sunucu limitini aşıyor." };
-    }
-
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      return {
-        ok: response.ok,
-        error: response.ok ? undefined : "Sunucu beklenmedik bir yanıt döndürdü.",
-      };
-    }
-
-    const data = await response.json().catch(() => null);
-    if (!response.ok) {
-      return {
-        ok: false,
-        error: (data && data.error) || "Yükleme başarısız.",
-      };
-    }
-    return { ok: true };
-  };
-
-  const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
-
-    setIsUploading(true);
-    setUploadError(null);
-    setUploadProgress(0);
-
-    const trimmedName = uploaderName.trim();
-    const failed: string[] = [];
-    const oversized: string[] = [];
-    let success = 0;
-
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const original = selectedFiles[i];
-      let toUpload = original;
-
-      if (canCompress(original)) {
-        try {
-          toUpload = await compressImage(original);
-        } catch {
-          toUpload = original;
-        }
-      }
-
-      if (toUpload.size > MAX_UPLOAD_BYTES) {
-        oversized.push(original.name);
-        setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
-        continue;
-      }
-
-      const result = await uploadSingle(toUpload, trimmedName);
-      if (result.ok) {
-        success++;
-      } else if (result.error?.includes("limit")) {
-        oversized.push(original.name);
-      } else {
-        failed.push(original.name);
-      }
-      setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
-    }
-
-    const messages: string[] = [];
-    if (oversized.length > 0) {
-      messages.push(
-        `Görsel boyutu fazla büyük: ${oversized.join(", ")}`
-      );
-    }
-    if (failed.length > 0) {
-      messages.push(`Yüklenemedi: ${failed.join(", ")}`);
-    }
-    if (messages.length > 0) {
-      setUploadError(messages.join(" · "));
-    }
-
-    if (success > 0) {
-      setUploadSuccess(true);
-      setSelectedFiles([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-
-    setIsUploading(false);
-  };
-
-  const removeFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
   return (
     <div className="min-h-screen bg-[var(--color-cream)]">
       {/* Header */}
@@ -162,18 +30,6 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
             >
               Galeriyi Görüntüle
             </a>
-            {driveUrl && (
-              <a
-                href={driveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2 text-xs font-sans tracking-[0.12em] uppercase rounded-full
-                  border border-[var(--color-warm-charcoal)] text-[var(--color-warm-charcoal)]
-                  hover:bg-[var(--color-warm-charcoal)] hover:text-[var(--color-warm-white)] transition-all duration-300"
-              >
-                Drive'da Görüntüle
-              </a>
-            )}
           </div>
         </div>
       </header>
@@ -187,7 +43,8 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
             Anınızı Paylaşın
           </h1>
           <p className="text-body-elegant mt-4 max-w-md mx-auto">
-            Bu özel günden çektiğiniz fotoğrafları bizimle paylaşın.
+            Bu özel günden çektiğiniz fotoğrafları doğrudan Google Drive
+            klasörümüze yükleyerek bizimle paylaşabilirsiniz.
           </p>
         </RevealSection>
       </div>
@@ -195,170 +52,36 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
       {/* Main content */}
       <div className="max-w-[var(--container-max)] mx-auto px-6 pb-20">
         <div className="max-w-lg mx-auto">
-          {uploadSuccess ? (
-            <RevealSection>
-              <div className="text-center py-12 px-8 bg-[var(--color-warm-white)] rounded-xl shadow-[var(--shadow-dreamy)]">
-                <div className="text-5xl mb-6">✨</div>
-                <h3 className="font-serif text-2xl text-[var(--color-warm-charcoal)] mb-3">
-                  Teşekkürler!
-                </h3>
-                <p className="text-body-elegant max-w-sm mx-auto mb-8">
-                  Fotoğraflarınız başarıyla yüklendi. Anı albümümüze güzel bir
-                  katkı oldu.
-                </p>
-                <div className="flex gap-3 justify-center flex-wrap">
-                  <button
-                    onClick={() => {
-                      setUploadSuccess(false);
-                      setSelectedFiles([]);
-                    }}
-                    className="btn-primary"
-                  >
-                    Daha Fazla Yükle
-                  </button>
-                  <a href={galleryUrl} className="btn-secondary">
-                    Galeriyi Görüntüle
-                  </a>
-                </div>
-              </div>
-            </RevealSection>
-          ) : (
-            <div className="bg-[var(--color-warm-white)] rounded-xl p-8 sm:p-10 shadow-[var(--shadow-dreamy)]">
-              {/* Name input */}
-              <div className="mb-8">
-                <label
-                  htmlFor="uploaderName"
-                  className="text-eyebrow block mb-3"
+          <div className="bg-[var(--color-warm-white)] rounded-xl p-8 sm:p-10 shadow-[var(--shadow-dreamy)] text-center">
+            <div className="text-5xl mb-6">📸</div>
+            <h3 className="font-serif text-2xl text-[var(--color-warm-charcoal)] mb-3">
+              Drive Klasörüne Yükle
+            </h3>
+            <p className="text-body-elegant max-w-sm mx-auto mb-8">
+              Butona tıkladığınızda açılan Google Drive klasörüne istediğiniz
+              kadar fotoğraf ve video ekleyebilirsiniz. Boyut sınırı yoktur.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {driveUrl ? (
+                <a
+                  href={driveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary justify-center"
                 >
-                  Adınız{" "}
-                  <span className="text-[var(--color-taupe-light)] normal-case tracking-normal">
-                    (isteğe bağlı)
-                  </span>
-                </label>
-                <input
-                  id="uploaderName"
-                  type="text"
-                  value={uploaderName}
-                  onChange={(e) => setUploaderName(e.target.value)}
-                  placeholder="Adınızı yazın..."
-                  className="w-full px-4 py-3 bg-[var(--color-cream)] border border-[var(--color-champagne-light)]/50 rounded-lg
-                    font-sans text-sm text-[var(--color-warm-charcoal)]
-                    placeholder:text-[var(--color-taupe-light)]
-                    focus:outline-none focus:border-[var(--color-champagne)] focus:ring-1 focus:ring-[var(--color-champagne)]/30
-                    transition-all duration-300"
-                />
-              </div>
-
-              {/* File drop zone */}
-              <div className="mb-6">
-                <label
-                  htmlFor="fileInput"
-                  className="text-eyebrow block mb-3"
-                >
-                  Fotoğraflarınız
-                </label>
-                <div
-                  className="border-2 border-dashed border-[var(--color-champagne-light)] rounded-xl p-8 text-center cursor-pointer
-                    hover:border-[var(--color-champagne)] hover:bg-[var(--color-cream)]/50 transition-all duration-300"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="text-3xl mb-3">📸</div>
-                  <p className="font-serif text-base text-[var(--color-warm-charcoal)]">
-                    Fotoğraflarınızı seçmek için tıklayın
-                  </p>
-                  <p className="text-caption mt-2">
-                    JPEG, PNG, WebP veya MP4 — Maks. 50MB
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    id="fileInput"
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-
-              {/* Selected files preview */}
-              {selectedFiles.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-eyebrow mb-3">
-                    {selectedFiles.length} dosya seçildi
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedFiles.map((file, index) => (
-                      <div
-                        key={`${file.name}-${index}`}
-                        className="relative aspect-square bg-[var(--color-cream)] rounded-lg overflow-hidden group"
-                      >
-                        {file.type.startsWith("image/") ? (
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <span className="text-2xl">🎬</span>
-                          </div>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFile(index);
-                          }}
-                          className="absolute top-1 right-1 w-6 h-6 bg-[var(--color-warm-charcoal)]/70 text-white rounded-full
-                            flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
-                          aria-label="Kaldır"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  Drive Klasörünü Aç
+                </a>
+              ) : (
+                <button disabled className="btn-primary justify-center opacity-50 cursor-not-allowed">
+                  Drive Bağlantısı Hazır Değil
+                </button>
               )}
-
-              {/* Upload error */}
-              {uploadError && (
-                <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-100">
-                  <p className="text-sm text-red-600">{uploadError}</p>
-                </div>
-              )}
-
-              {/* Upload progress */}
-              {isUploading && (
-                <div className="mb-6">
-                  <div className="h-1.5 bg-[var(--color-cream-dark)] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[var(--color-champagne)] rounded-full transition-all duration-500"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-caption text-center mt-2">
-                    Yükleniyor... %{uploadProgress}
-                  </p>
-                </div>
-              )}
-
-              {/* Upload button */}
-              <button
-                onClick={handleUpload}
-                disabled={selectedFiles.length === 0 || isUploading}
-                className={`btn-primary w-full justify-center ${
-                  selectedFiles.length === 0 || isUploading
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                {isUploading ? "Yükleniyor..." : "Fotoğrafları Paylaş"}
-              </button>
+              <a href={galleryUrl} className="btn-secondary justify-center">
+                Galeriyi Görüntüle
+              </a>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
