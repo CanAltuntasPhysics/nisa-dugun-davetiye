@@ -61,7 +61,7 @@ export default function IntroVideoSection({
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-hidden bg-[var(--color-warm-black)] transition-opacity duration-[1200ms] ease-out
+      className={`fixed inset-0 z-50 overflow-hidden bg-[var(--color-warm-black)] transition-opacity duration-[1200ms] ease-out lg:bg-[var(--color-cream)]
         ${isFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="presentation"
       style={{ height: "100dvh" }}
@@ -72,12 +72,10 @@ export default function IntroVideoSection({
         poster="/hero-image.jpg"
         playsInline
         preload="auto"
-        className="absolute inset-0"
+        className="absolute inset-0 h-full w-full object-cover object-center lg:object-contain"
         style={{
           width: "100%",
           height: "100%",
-          objectFit: "cover",
-          objectPosition: "center",
         }}
       />
 

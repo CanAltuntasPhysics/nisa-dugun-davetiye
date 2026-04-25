@@ -57,10 +57,6 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
             <h3 className="font-serif text-2xl text-[var(--color-warm-charcoal)] mb-3">
               Drive Klasörüne Yükle
             </h3>
-            <p className="text-body-elegant max-w-sm mx-auto mb-8">
-              Butona tıkladığınızda açılan Google Drive klasörüne istediğiniz
-              kadar fotoğraf ve video ekleyebilirsiniz. Boyut sınırı yoktur.
-            </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               {driveUrl ? (

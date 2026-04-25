@@ -54,22 +54,26 @@ export default function NamesRevealSection({
 
   return (
     <div
-      className={`fixed inset-0 z-40 overflow-hidden transition-opacity duration-[1000ms] ease-out
+      className={`fixed inset-0 z-40 overflow-hidden bg-[var(--color-warm-black)] transition-opacity duration-[1000ms] ease-out lg:bg-[var(--color-cream)]
         ${isFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="presentation"
       style={{ height: "100dvh" }}
     >
-      <Image
-        src="/hero-image.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        style={{ objectFit: "cover", objectPosition: "center" }}
-      />
+      <div className="absolute inset-0 lg:flex lg:items-center lg:justify-center">
+        <div className="relative h-full w-full lg:w-auto lg:aspect-[736/920] lg:max-w-full">
+          <Image
+            src="/hero-image.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center lg:object-contain"
+          />
 
-      <div className="absolute inset-0 bg-[var(--color-warm-black)]/35" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-warm-black)]/30 via-transparent to-[var(--color-warm-black)]/50" />
+          <div className="absolute inset-0 bg-[var(--color-warm-black)]/35" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-warm-black)]/30 via-transparent to-[var(--color-warm-black)]/50" />
+        </div>
+      </div>
 
       <div className="relative z-10 h-full flex items-center justify-center px-6">
         <div className="text-center max-w-2xl mx-auto flex flex-col items-center">
