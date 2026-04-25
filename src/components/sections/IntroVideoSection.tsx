@@ -61,7 +61,7 @@ export default function IntroVideoSection({
 
   return (
     <div
-      className={`fixed inset-0 z-50 overflow-hidden bg-[var(--color-warm-black)] transition-opacity duration-[1200ms] ease-out lg:bg-[var(--color-cream)]
+      className={`fixed inset-0 z-50 overflow-hidden bg-[var(--color-cream)] transition-opacity duration-[1200ms] ease-out
         ${isFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       role="presentation"
       style={{ height: "100dvh" }}
@@ -69,10 +69,10 @@ export default function IntroVideoSection({
       <video
         ref={videoRef}
         src={iosSafeSrc}
-        poster="/hero-image.jpg"
         playsInline
         preload="auto"
-        className="absolute inset-0 h-full w-full object-cover object-center lg:object-contain"
+        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 lg:object-contain
+          ${started ? "opacity-100" : "opacity-0"}`}
         style={{
           width: "100%",
           height: "100%",
@@ -82,14 +82,14 @@ export default function IntroVideoSection({
       {!started && (
         <button
           onClick={handleStart}
-          className="absolute inset-0 z-20 flex items-end justify-center pb-28 sm:pb-32 bg-[var(--color-warm-black)]/55 cursor-pointer group"
+          className="absolute inset-0 z-20 flex items-end justify-center bg-[var(--color-cream)] pb-28 cursor-pointer group sm:pb-32"
           aria-label="Davetiyeyi başlat"
         >
           <span
-            className="font-serif uppercase text-lg sm:text-xl md:text-2xl font-light tracking-[0.3em] text-[var(--color-cream)] animate-slow-pulse transition-transform duration-500 group-hover:scale-[1.03]"
+            className="font-serif uppercase text-lg font-light tracking-[0.3em] text-[var(--color-warm-charcoal)] animate-slow-pulse transition-transform duration-500 group-hover:scale-[1.03] sm:text-xl md:text-2xl"
             style={{
               textShadow:
-                "0 2px 14px rgba(0,0,0,0.65), 0 0 28px rgba(0,0,0,0.4)",
+                "0 2px 14px rgba(212,184,150,0.24)",
             }}
           >
             DOKUNARAK BAŞLA

@@ -202,7 +202,7 @@ export default function GalleryClient({
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={`/api/photos/${active.id}/media`}
+                src={`/api/photos/${active.id}/media?size=preview`}
                 alt={active.name}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
               />

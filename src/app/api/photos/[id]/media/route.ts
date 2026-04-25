@@ -11,11 +11,14 @@ export async function GET(
   }
 
   const url = new URL(request.url);
-  const isThumb = url.searchParams.get("size") === "thumb";
+  const requestedSize = url.searchParams.get("size");
 
   try {
-    if (isThumb) {
-      const thumb = await getFileThumbnail(id, 500);
+    if (requestedSize === "thumb" || requestedSize === "preview") {
+      const thumb = await getFileThumbnail(
+        id,
+        requestedSize === "preview" ? 1800 : 500
+      );
       if (thumb) {
         return new Response(thumb.body, {
           headers: {

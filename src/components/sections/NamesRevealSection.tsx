@@ -50,7 +50,7 @@ export default function NamesRevealSection({
     };
   }, [started, startDelay, holdAfterReveal]);
 
-  if (!isVisible) return null;
+  if (!started || !isVisible) return null;
 
   return (
     <div
