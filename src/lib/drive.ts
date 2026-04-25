@@ -97,6 +97,21 @@ function toDriveError(error: unknown, action: string): DriveError {
   );
 }
 
+function shouldUsePublicFallback(error: unknown) {
+  if (error instanceof DriveError) {
+    return error.status === 401 || error.status === 403;
+  }
+
+  const { status, message, reasons } = getDriveApiErrorDetails(error);
+  const searchable = [message, ...reasons].filter(Boolean).join(" ");
+
+  return (
+    status === 401 ||
+    status === 403 ||
+    /insufficient|scope|unauthorized|invalid_grant/i.test(searchable)
+  );
+}
+
 function getAuth() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -165,7 +180,15 @@ export async function listGalleryFilesPage({
   const folderId = getGalleryFolderId();
 
   if (hasOAuthCredentials()) {
-    return listGalleryFilesPageWithOAuth({ folderId, pageSize, pageToken });
+    try {
+      return await listGalleryFilesPageWithOAuth({ folderId, pageSize, pageToken });
+    } catch (error) {
+      if (!shouldUsePublicFallback(error)) throw error;
+      console.warn(
+        "[DRIVE] OAuth failed while listing gallery; falling back to public folder.",
+        error instanceof Error ? error.message : error
+      );
+    }
   }
 
   if (getDriveApiKey()) {
@@ -418,6 +441,13 @@ export async function getFileMedia(fileId: string): Promise<{
       size: meta.data.size ? Number(meta.data.size) : undefined,
     };
   } catch (error) {
+    if (shouldUsePublicFallback(error)) {
+      console.warn(
+        "[DRIVE] OAuth failed while reading media; falling back to public file.",
+        error instanceof Error ? error.message : error
+      );
+      return getPublicFileMedia(fileId);
+    }
     throw toDriveError(error, "Medya dosyası okunurken");
   }
 }
@@ -460,6 +490,13 @@ export async function getFileThumbnail(
       mimeType: res.headers.get("content-type") || "image/jpeg",
     };
   } catch (error) {
+    if (shouldUsePublicFallback(error)) {
+      console.warn(
+        "[DRIVE] OAuth failed while reading thumbnail; falling back to public thumbnail.",
+        error instanceof Error ? error.message : error
+      );
+      return getPublicFileThumbnail(fileId, size);
+    }
     throw toDriveError(error, "Önizleme görseli okunurken");
   }
 }
