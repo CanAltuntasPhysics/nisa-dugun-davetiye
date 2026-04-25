@@ -58,7 +58,7 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
               Drive Klasörüne Yükle
             </h3>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex justify-center">
               {driveUrl ? (
                 <a
                   href={driveUrl}
@@ -73,9 +73,6 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
                   Drive Bağlantısı Hazır Değil
                 </button>
               )}
-              <a href={galleryUrl} className="btn-secondary justify-center">
-                Galeriyi Görüntüle
-              </a>
             </div>
           </div>
         </div>
