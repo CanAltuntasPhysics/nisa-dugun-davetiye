@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -15,16 +16,19 @@ import { useEffect, useRef, useState } from "react";
  */
 export default function IntroVideoSection({
   videoSrc = "/hero-video.mp4",
+  fallbackImageSrc = "/intro-fallback.jpg",
   duration = 10000,
   onStart,
 }: {
   videoSrc?: string;
+  fallbackImageSrc?: string;
   duration?: number;
   onStart?: () => void;
 }) {
   const [started, setStarted] = useState(false);
   const [isFading, setIsFading] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isVideoReady, setIsVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -66,13 +70,29 @@ export default function IntroVideoSection({
       role="presentation"
       style={{ height: "100dvh" }}
     >
+      <Image
+        src={fallbackImageSrc}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className={`object-cover object-center transition-opacity duration-500 lg:object-contain
+          ${started && isVideoReady ? "opacity-0" : "opacity-100"}`}
+      />
+      <div
+        className={`absolute inset-0 bg-[var(--color-warm-black)]/35 transition-opacity duration-500
+          ${started && isVideoReady ? "opacity-0" : "opacity-100"}`}
+      />
+
       <video
         ref={videoRef}
         src={iosSafeSrc}
         playsInline
         preload="auto"
+        onLoadedData={() => setIsVideoReady(true)}
+        onPlaying={() => setIsVideoReady(true)}
         className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 lg:object-contain
-          ${started ? "opacity-100" : "opacity-0"}`}
+          ${started && isVideoReady ? "opacity-100" : "opacity-0"}`}
         style={{
           width: "100%",
           height: "100%",
@@ -82,14 +102,14 @@ export default function IntroVideoSection({
       {!started && (
         <button
           onClick={handleStart}
-          className="absolute inset-0 z-20 flex items-end justify-center bg-[var(--color-cream)] pb-28 cursor-pointer group sm:pb-32"
+          className="absolute inset-0 z-20 flex items-end justify-center pb-28 cursor-pointer group sm:pb-32"
           aria-label="Davetiyeyi başlat"
         >
           <span
-            className="font-serif uppercase text-lg font-light tracking-[0.3em] text-[var(--color-warm-charcoal)] animate-slow-pulse transition-transform duration-500 group-hover:scale-[1.03] sm:text-xl md:text-2xl"
+            className="font-serif uppercase text-lg font-light tracking-[0.3em] text-[var(--color-cream)] animate-slow-pulse transition-transform duration-500 group-hover:scale-[1.03] sm:text-xl md:text-2xl"
             style={{
               textShadow:
-                "0 2px 14px rgba(212,184,150,0.24)",
+                "0 2px 14px rgba(0,0,0,0.65), 0 0 28px rgba(0,0,0,0.4)",
             }}
           >
             DOKUNARAK BAŞLA
