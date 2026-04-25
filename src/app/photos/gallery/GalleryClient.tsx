@@ -4,14 +4,25 @@ import { useState, useEffect, useCallback } from "react";
 import type { GalleryFile } from "@/lib/drive";
 
 interface GalleryClientProps {
-  files: GalleryFile[];
+  initialFiles: GalleryFile[];
+  initialNextPageToken: string | null;
 }
 
-const PAGE_SIZE = 8;
+interface GalleryResponse {
+  files: GalleryFile[];
+  nextPageToken: string | null;
+  error?: string;
+}
 
-export default function GalleryClient({ files }: GalleryClientProps) {
+export default function GalleryClient({
+  initialFiles,
+  initialNextPageToken,
+}: GalleryClientProps) {
+  const [files, setFiles] = useState(initialFiles);
+  const [nextPageToken, setNextPageToken] = useState(initialNextPageToken);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
 
   const close = useCallback(() => setActiveIndex(null), []);
   const next = useCallback(
@@ -28,6 +39,39 @@ export default function GalleryClient({ files }: GalleryClientProps) {
       ),
     [files.length]
   );
+  const loadMore = useCallback(async () => {
+    if (!nextPageToken || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    setLoadMoreError(null);
+
+    try {
+      const params = new URLSearchParams({ pageToken: nextPageToken });
+      const response = await fetch(`/api/photos/gallery?${params}`, {
+        cache: "no-store",
+      });
+      const data = (await response.json()) as GalleryResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || "Fotoğraflar yüklenirken hata oluştu.");
+      }
+
+      setFiles((current) => {
+        const existingIds = new Set(current.map((file) => file.id));
+        const newFiles = data.files.filter((file) => !existingIds.has(file.id));
+        return [...current, ...newFiles];
+      });
+      setNextPageToken(data.nextPageToken);
+    } catch (error) {
+      setLoadMoreError(
+        error instanceof Error
+          ? error.message
+          : "Fotoğraflar yüklenirken hata oluştu."
+      );
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, nextPageToken]);
 
   useEffect(() => {
     if (activeIndex === null) return;
@@ -56,7 +100,7 @@ export default function GalleryClient({ files }: GalleryClientProps) {
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
-        {files.slice(0, visibleCount).map((file, index) => {
+        {files.map((file, index) => {
           const isVideo = file.mimeType.startsWith("video/");
           return (
             <button
@@ -83,17 +127,22 @@ export default function GalleryClient({ files }: GalleryClientProps) {
         })}
       </div>
 
-      {visibleCount < files.length && (
+      {nextPageToken && (
         <div className="text-center mt-10">
           <button
-            onClick={() =>
-              setVisibleCount((c) => Math.min(c + PAGE_SIZE, files.length))
-            }
+            onClick={loadMore}
+            disabled={isLoadingMore}
             className="btn-primary"
           >
-            Daha Fazla Görüntüle
+            {isLoadingMore ? "Yükleniyor..." : "Daha Fazla Görüntüle"}
           </button>
         </div>
+      )}
+
+      {loadMoreError && (
+        <p className="text-center text-sm text-red-600 mt-4">
+          {loadMoreError}
+        </p>
       )}
 
       {active && (

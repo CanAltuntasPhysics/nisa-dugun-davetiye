@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { GOOGLE_DRIVE_SCOPES } from "@/lib/googleDriveScopes";
 
 /**
  * GET /api/auth/google
@@ -28,8 +29,9 @@ export async function GET(request: NextRequest) {
 
   const authorizeUrl = oauth2Client.generateAuthUrl({
     access_type: "offline",
+    include_granted_scopes: true,
     prompt: "consent",
-    scope: ["https://www.googleapis.com/auth/drive.file"],
+    scope: [...GOOGLE_DRIVE_SCOPES],
   });
 
   console.log("🔗 [AUTH] Redirecting to Google consent screen...");

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getUploadFolderId } from "@/lib/driveConfig";
 import PhotosClient from "./PhotosClient";
 
 export const metadata: Metadata = {
@@ -7,10 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default function PhotosPage() {
-  const folderId = process.env.DRIVE_GALLERY_FOLDER_ID;
-  const driveUrl = folderId
-    ? `https://drive.google.com/drive/folders/${folderId}`
-    : null;
+  const driveUrl = `https://drive.google.com/drive/folders/${getUploadFolderId()}`;
 
   return <PhotosClient galleryUrl="/photos/gallery" driveUrl={driveUrl} />;
 }

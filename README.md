@@ -13,7 +13,7 @@ Romantik, sinematik, minimal bir düğün davetiye sitesi ve Google Drive destek
 
 ## 🛠 Teknoloji
 
-- **Next.js 15** (App Router, TypeScript)
+- **Next.js 16** (App Router, TypeScript)
 - **Tailwind CSS** (özel altın saat tasarım tokenleri ile)
 - **Google Drive API** (fotoğraf depolama)
 - **QR Code React** (QR kod oluşturma)
@@ -28,26 +28,43 @@ npm install
 
 ### 2. Ortam değişkenlerini ayarlayın
 
-`.env.local.example` dosyasını `.env.local` olarak kopyalayın:
+Proje kökünde `.env.local` oluşturun:
 
-```bash
-cp .env.local.example .env.local
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REFRESH_TOKEN=
+GOOGLE_DRIVE_API_KEY=
+DRIVE_GALLERY_FOLDER_ID=
+DRIVE_UPLOAD_FOLDER_ID=
 ```
 
 ### 3. Google Drive API Kurulumu
 
 1. [Google Cloud Console](https://console.cloud.google.com/) üzerinde yeni bir proje oluşturun
 2. **Google Drive API**'yi etkinleştirin
-3. **Service Account** oluşturun ve JSON anahtarını indirin
-4. JSON anahtarından `client_email` ve `private_key` değerlerini `.env.local`'e kopyalayın
-5. Google Drive'da iki klasör oluşturun:
+3. **OAuth consent screen** kurulumunu tamamlayın
+   - Test modundaysa kendi Google hesabınızı test kullanıcısı olarak ekleyin
+4. **OAuth Client ID** oluşturun
+   - Application type: **Web application**
+   - Authorized redirect URI:
+     - Lokal: `http://localhost:3000/api/auth/callback`
+     - Yayın: `https://alan-adiniz.com/api/auth/callback`
+5. Client ID ve Client Secret değerlerini `.env.local` içine ekleyin
+6. Google Drive'da iki klasör oluşturun:
    - **Upload Klasörü**: Yeni yüklemeler buraya gelir
    - **Gallery Klasörü**: Galeriye yalnızca bu klasördeki dosyalar gösterilir
    - *Basit kurulumda ikisi aynı klasör olabilir*
-6. Klasörleri service account email adresiyle paylaşın (Editor yetkisi)
+   - Yüklenen görsellerin galeride hemen görünmesi için `DRIVE_UPLOAD_FOLDER_ID` ve `DRIVE_GALLERY_FOLDER_ID` aynı klasör ID'si olmalıdır
 7. Klasör ID'lerini `.env.local`'e ekleyin
+8. Upload klasörünü Google Drive'da **Anyone with the link → Editor** olarak paylaşın
+9. Geliştirme sunucusunu başlatıp `http://localhost:3000/api/auth/google` adresini açın
+10. Drive klasörünün sahibi olan Google hesabıyla izin verin
+11. Callback sayfasındaki `GOOGLE_REFRESH_TOKEN` değerini `.env.local` ve Vercel ortam değişkenlerine ekleyin
 
 > **Klasör ID**: Drive'da klasörü açtığınızda URL'deki son kısım: `drive.google.com/drive/folders/{FOLDER_ID}`
+>
+> **Önemli**: Public klasör akışında OAuth zorunlu değildir. `GOOGLE_DRIVE_API_KEY` eklerseniz galeri resmi Drive API ile public klasörü listeler; API key yoksa public Drive klasör sayfasından fallback okuma yapılır. OAuth kullanacaksanız, misafirlerin Drive klasörüne doğrudan yüklediği dosyaları okuyabilmek için token'ın `drive.readonly` kapsamıyla üretilmiş olması gerekir.
 
 ### 4. Geliştirme sunucusunu başlatın
 
@@ -69,8 +86,8 @@ src/
 │   │   ├── page.tsx                # Fotoğraf albümü sayfası
 │   │   └── PhotosClient.tsx        # Galeri/yükleme UI (client component)
 │   └── api/photos/
-│       ├── upload/route.ts         # POST — fotoğraf yükleme
-│       └── list/route.ts           # GET — galeri listeleme
+│       ├── [id]/media/route.ts     # GET — Drive medyasını proxy'ler
+│       └── fix-permissions/route.ts # POST — eski dosya izinlerini düzeltir
 ├── components/
 │   ├── ui/
 │   │   └── RevealSection.tsx       # Scroll reveal animasyon wrapper
@@ -119,7 +136,8 @@ npx vercel
 ```
 
 - Ortam değişkenlerini Vercel dashboard'undan ayarlayın
-- `GOOGLE_PRIVATE_KEY` değerini doğru biçimde (newline'lar korunarak) ekleyin
+- OAuth redirect URI listesine yayın alan adınızı ekleyin
+- `GOOGLE_REFRESH_TOKEN` değerini yeni kapsamlarla ürettikten sonra Vercel'e ekleyin
 
 ## 📝 İçerik Düzenleme
 

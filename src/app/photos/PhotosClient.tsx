@@ -70,7 +70,7 @@ export default function PhotosClient({ galleryUrl, driveUrl }: PhotosClientProps
                   rel="noopener noreferrer"
                   className="btn-primary justify-center"
                 >
-                  Drive Klasörünü Aç
+                  Görsel Yükle
                 </a>
               ) : (
                 <button disabled className="btn-primary justify-center opacity-50 cursor-not-allowed">

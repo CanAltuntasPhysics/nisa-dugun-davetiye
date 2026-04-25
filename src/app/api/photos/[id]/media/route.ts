@@ -1,4 +1,4 @@
-import { getFileMedia, getFileThumbnail } from "@/lib/drive";
+import { DriveError, getFileMedia, getFileThumbnail } from "@/lib/drive";
 
 export async function GET(
   request: Request,
@@ -49,6 +49,9 @@ export async function GET(
     return new Response(webStream, { headers });
   } catch (error) {
     console.error(`[MEDIA] Failed for ${id}:`, error instanceof Error ? error.message : error);
+    if (error instanceof DriveError) {
+      return new Response(error.message, { status: error.status });
+    }
     return new Response("Not found", { status: 404 });
   }
 }

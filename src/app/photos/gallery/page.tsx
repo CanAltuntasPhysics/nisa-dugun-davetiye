@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listGalleryFiles } from "@/lib/drive";
+import { listGalleryFilesPage } from "@/lib/drive";
 import GalleryClient from "./GalleryClient";
 
 export const metadata: Metadata = {
@@ -10,12 +10,17 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 8;
+
 export default async function GalleryPage() {
-  let files: Awaited<ReturnType<typeof listGalleryFiles>> = [];
+  let files: Awaited<ReturnType<typeof listGalleryFilesPage>>["files"] = [];
+  let nextPageToken: string | null = null;
   let errorMessage: string | null = null;
 
   try {
-    files = await listGalleryFiles();
+    const page = await listGalleryFilesPage({ pageSize: PAGE_SIZE });
+    files = page.files;
+    nextPageToken = page.nextPageToken;
   } catch (err) {
     errorMessage =
       err instanceof Error ? err.message : "Galeri yüklenirken bir hata oluştu.";
@@ -59,7 +64,10 @@ export default async function GalleryPage() {
             <p className="text-sm text-red-600">{errorMessage}</p>
           </div>
         ) : (
-          <GalleryClient files={files} />
+          <GalleryClient
+            initialFiles={files}
+            initialNextPageToken={nextPageToken}
+          />
         )}
       </div>
     </div>

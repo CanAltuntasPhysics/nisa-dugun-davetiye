@@ -30,6 +30,7 @@ export async function POST() {
     try {
       await drive.permissions.create({
         fileId: folderId,
+        supportsAllDrives: true,
         requestBody: { role: "reader", type: "anyone" },
       });
       folderFixed = true;
@@ -45,6 +46,8 @@ export async function POST() {
     const response = await drive.files.list({
       q: `'${folderId}' in parents and trashed = false`,
       pageSize: 100,
+      includeItemsFromAllDrives: true,
+      supportsAllDrives: true,
       fields: "files(id, name)",
     });
 
@@ -58,6 +61,7 @@ export async function POST() {
       try {
         await drive.permissions.create({
           fileId: file.id!,
+          supportsAllDrives: true,
           requestBody: {
             role: "reader",
             type: "anyone",
