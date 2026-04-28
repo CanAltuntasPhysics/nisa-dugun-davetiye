@@ -10,7 +10,7 @@ interface TimeLeft {
 }
 
 /**
- * Countdown hook targeting the wedding date: 2 Mayıs 2026
+ * Countdown hook targeting the wedding date: 1 Mayıs 2026
  */
 export function useCountdown(targetDate: Date): TimeLeft {
   // Initialize with zeros to avoid SSR hydration mismatch —

@@ -129,7 +129,7 @@ export default function HeroSection({
 
         {/* Names */}
         <h1
-          className={`font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-[var(--color-warm-charcoal)] tracking-tight leading-[1.05] mb-6
+          className={`font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-[var(--color-warm-charcoal)] tracking-tight leading-[1.05] mb-3
             transition-all duration-[1400ms] ease-out
             ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           style={{ transitionDelay: "800ms" }}
@@ -140,6 +140,16 @@ export default function HeroSection({
           </span>{" "}
           Ömer
         </h1>
+
+        {/* Families */}
+        <p
+          className={`font-serif italic text-base sm:text-lg text-[var(--color-champagne-muted)] mb-6
+            transition-all duration-[1200ms] ease-out
+            ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          style={{ transitionDelay: "900ms" }}
+        >
+          Yücesan & Kayadaş Aileleri
+        </p>
 
         {/* Invitation tagline */}
         <p
@@ -158,7 +168,7 @@ export default function HeroSection({
           style={{ transitionDelay: "1200ms" }}
         >
           <p className="font-serif text-2xl text-[var(--color-warm-charcoal)]">
-            2 Mayıs 2026
+            1 Mayıs 2026
           </p>
         </div>
       </div>

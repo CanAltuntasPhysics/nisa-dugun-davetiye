@@ -7,11 +7,11 @@ import { useEffect, useRef, useState } from "react";
 /**
  * Countdown Section
  *
- * Elegant, typographic countdown to 2 Mayıs 2026.
+ * Elegant, typographic countdown to 1 Mayıs 2026.
  * Looks like refined editorial print, not a dashboard widget.
  */
 
-const WEDDING_DATE = new Date("2026-05-02T15:00:00+03:00");
+const WEDDING_DATE = new Date("2026-05-01T15:00:00+03:00");
 
 interface CountdownUnitProps {
   value: number;
@@ -116,10 +116,10 @@ export default function CountdownSection() {
             <p className="text-eyebrow mb-3">Büyük Güne Kalan Süre</p>
             <div className="ornament-line" />
             <h2 className="font-serif text-5xl sm:text-6xl text-[var(--color-warm-charcoal)] font-light mt-6">
-              2 Mayıs 2026
+              1 Mayıs 2026
             </h2>
             <p className="text-[var(--color-champagne-muted)] text-lg mt-3">
-              Cumartesi, Saat 19:00
+              Cuma, Saat 19:00
             </p>
           </div>
         </RevealSection>

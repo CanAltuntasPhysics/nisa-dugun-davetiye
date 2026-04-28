@@ -24,13 +24,13 @@ const pinyonScript = Pinyon_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Nisa & Ömer — 2 Mayıs 2026",
+  title: "Nisa & Ömer — 1 Mayıs 2026",
   description:
     "Düğünümüze davetlisiniz. Nisa ve Ömer'in özel gününe siz de katılın.",
   keywords: ["düğün", "davetiye", "Nisa", "Ömer", "wedding"],
   openGraph: {
     title: "Nisa & Ömer — Düğünümüze Davetlisiniz",
-    description: "2 Mayıs 2026 — Özel günümüze siz de katılın.",
+    description: "1 Mayıs 2026 — Özel günümüze siz de katılın.",
     type: "website",
   },
 };
